@@ -14,6 +14,7 @@ class FR(threading.Thread):
         self._onNameCallable = None
         if (not onNameCallable is None) and callable(onNameCallable):
             self._onNameCallable = onNameCallable
+        self.loadParam() #Start Point
 
     def stop(self): #остановка потока
         self._sysWork.set()
@@ -23,16 +24,16 @@ class FR(threading.Thread):
         self.join()
 
     def loadParam(self):
-        self.video_cap = cv2.VideoCapture(0)
         for img in self._src_image:
             obama_image = face_recognition.load_image_file(img)
             self.known_face_encodings.append(face_recognition.face_encodings(obama_image)[0])
             self.known_face_names.append(img[0 : img.find(".", 0, len(img))]) #"image.jpg" -> "image"
         print("source images read")
-        print("///FaceRecognition started sucsesfully")
         if self._onNameCallable is None:
             print("Have a problem with callable function")
             self.stop()
+        else:
+            print("///FaceRecognition started sucsesfully")
         self.run()
             
     def run(self):
@@ -40,7 +41,7 @@ class FR(threading.Thread):
         face_encodings = []
         face_names = []
         #process_this_frame = True
-        while not self._stopped.is_set():
+        while not self._sysWork.is_set():
             self._newFrameEvent.wait()
             if not (self._frame is None):
                 small_frame = cv2.resize(self._frame, (0, 0), fx=0.25, fy=0.25)
@@ -62,7 +63,7 @@ class FR(threading.Thread):
                     self._onNameCallable(face_names)
                 face_names.clear()
             self._newFrameEvent.clear()
-                    
+        print("///FaceRecognition stopped")        
 
         
                     
