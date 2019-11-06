@@ -1,10 +1,12 @@
 import face_recognition
-import cv2
 import numpy as np
+import threading
+import cv2
 
 class FR(threading.Thread):
-    def __init__(self, , src_image, newFrameEvent, sysWork, frame, onNameCallable):
+    def __init__(self, src_image, newFrameEvent, sysWork, frame, onNameCallable):
         threading.Thread.__init__(self)
+        self.daemon = True
         self._src_image = src_image #pathes to source image
         self.known_face_encodings = []
         self.known_face_names = []
@@ -28,6 +30,7 @@ class FR(threading.Thread):
             obama_image = face_recognition.load_image_file(img)
             self.known_face_encodings.append(face_recognition.face_encodings(obama_image)[0])
             self.known_face_names.append(img[0 : img.find(".", 0, len(img))]) #"image.jpg" -> "image"
+        print(self.known_face_names)
         print("source images read")
         if self._onNameCallable is None:
             print("Have a problem with callable function")
@@ -42,6 +45,7 @@ class FR(threading.Thread):
         face_names = []
         #process_this_frame = True
         while not self._sysWork.is_set():
+            print("AAA")
             self._newFrameEvent.wait()
             if not (self._frame is None):
                 small_frame = cv2.resize(self._frame, (0, 0), fx=0.25, fy=0.25)
@@ -64,41 +68,3 @@ class FR(threading.Thread):
                 face_names.clear()
             self._newFrameEvent.clear()
         print("///FaceRecognition stopped")        
-
-        
-                    
-
-                
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            
-            
-
-    
-    
