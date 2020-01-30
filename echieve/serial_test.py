@@ -6,12 +6,11 @@ import threading
 
 class ArdHandler():
     def __init__(self, func=None):
-        self._inReady = threading.Event()
-        self._stopped = threading.Event()
-        self.req = None
         self._setter = func
-
-        self.ser = serial.Serial('/dev/ttyACM0', 9600)
+        #self.ser = serial.Serial('/dev/ttyACM0', 9600)
+        self.ser = serial.Serial('/dev/ttyUSB0', 9600)
+        self._stopped = threading.Event()
+        self.config()
         
     def config(self):
         self._setter("ArdHandler started!")
@@ -50,34 +49,8 @@ class ArdHandler():
             self._setter(str(buff))
             if b'AAA' in buff:
                 break
-    '''  
-    def run(self):
-        self.config()
-        try:
-            while not self._stopped.is_set():
-                self._inReady.wait()
-                self.ser.write(bytes(self.req, encoding = 'UTF-8'))
-                self.req = None
-                while not self._stopped.is_set():
-                    buff = self.ser.readline()
-                    buff = buff[:-2]
-                    if buff == b'AAA':break
-                    if b'Found ID' in buff:
-                        self._setter("it's work )")
-                    self._setter(str(buff))
-                self._inReady.clear()
-                self._setter("RPI: exittttt")
-                    
-        except Exception as e:
-            print(e)
-            self._setter("ARD: connect broken")
-        finally:
-            self._setter("ArdHandler stopped")
 
     def stop(self):
         self._stopped.set()
-        self._inReady.set()
-    '''
-    def stop(self):
         self.ser.close()
         self._setter("ArdHandler stopped")

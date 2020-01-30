@@ -14,25 +14,40 @@
   BSD license, all text above must be included in any redistribution
  ****************************************************/
 
-
 #include <Adafruit_Fingerprint.h>
 
 // On Leonardo/Micro or others with hardware serial, use those! #0 is green wire, #1 is white
 // uncomment this line:
-#define mySerial Serial1
+ #define mySerial Serial1
 
 // For UNO and others without hardware serial, we must use software serial...
 // pin #2 is IN from sensor (GREEN wire)
-/// pin #3 is OUT from arduino  (WHITE wire)
-//comment these two lines if using hardware serial
- // SoftwareSerial mySerial(5, 4);
+// pin #3 is OUT from arduino  (WHITE wire)
+// comment these two lines if using hardware serial
+//SoftwareSerial mySerial(2, 3);
 
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&mySerial);
 
 uint8_t id;
 
-bool read_mode = false;
-bool write_mode  = false;
+void setup()  
+{
+  Serial.begin(9600);
+  while (!Serial);  // For Yun/Leo/Micro/Zero/...
+  delay(100);
+  Serial.println("\n\nAdafruit Fingerprint sensor enrollment");
+
+  // set the data rate for the sensor serial port
+  finger.begin(57600);
+  
+  if (finger.verifyPassword()) {
+    Serial.println("Found fingerprint sensor!");
+  } else {
+    Serial.println("Did not find fingerprint sensor :(");
+    while (1) { delay(1); }
+  }
+}
+
 uint8_t readnumber(void) {
   uint8_t num = 0;
   
@@ -43,80 +58,19 @@ uint8_t readnumber(void) {
   return num;
 }
 
-void setup()  
-{
-  Serial.begin(9600);
-  while (!Serial);  // For Yun/Leo/Micro/Zero/...
-  delay(100);
-  //Serial.println("\n\nAdafruit finger detect test");
-
-  // set the data rate for the sensor serial port
-  finger.begin(57600);
-  delay(5);
-  if (finger.verifyPassword()) {
-    Serial.println("1");
-  } else {
-    Serial.println("0");
-    while (1) { delay(1); }
-  }
-
-  finger.getTemplateCount();
-  Serial.println(finger.templateCount);
-  //Serial.print("Sensor contains "); Serial.print(finger.templateCount); Serial.println(" templates");
-  //Serial.println("Waiting for valid finger...");
-  //Serial.println("asdfgh\n");
-  finger.emptyDatabase();
-  Serial.println("Now database is empty :)");
-}
-
 void loop()                     // run over and over again
 {
-  if(Serial.available()){
-    byte num = Serial.read();
-    char ch = char(num);
-    if(num == 48) read_mode = true;
-    if(num == 49) write_mode = true;
-    if(read_mode){
-      Serial.println("in read mode");
-      while( getFingerprintIDez());
-      read_mode = false;
-      Serial.println("AAA");  
-    }
-    if(write_mode){
-      Serial.println("Ready to enroll a fingerprint!");
-      Serial.println("Please type in the ID # (from 1 to 127) you want to save this finger as...");
-      Serial.println("AAA");
-      id = readnumber();
-      if (id == 0) {// ID #0 not allowed, try again!
-        return;
-      }
-      Serial.print("Enrolling ID #");
-      Serial.println(id);
-      while (!  getFingerprintEnroll() );
-      write_mode = false;
-      Serial.println("AAA");
-    }
+  Serial.println("Ready to enroll a fingerprint!");
+  Serial.println("Please type in the ID # (from 1 to 127) you want to save this finger as...");
+  Serial.println("Please");
+  id = readnumber();
+  if (id == 0) {// ID #0 not allowed, try again!
+     return;
   }
-  delay(50);            //don't ned to run this at full speed.
-}
-
-// returns -1 if failed, otherwise returns ID #
-int getFingerprintIDez() {
-  Serial.println("Put finger");
-  uint8_t p = finger.getImage();
-  //Serial.println(p);
-  if (p != FINGERPRINT_OK)  return -1;
-
-  p = finger.image2Tz();
-  if (p != FINGERPRINT_OK)  return -1;
-
-  p = finger.fingerFastSearch();
-  if (p != FINGERPRINT_OK)  return -1;
+  Serial.print("Enrolling ID #");
+  Serial.println(id);
   
-  // found a match!
-  Serial.print("Found ID #"); Serial.print(finger.fingerID); 
-  Serial.print(" with confidence of "); Serial.println(finger.confidence);
-  return 0; 
+  while (!  getFingerprintEnroll() );
 }
 
 uint8_t getFingerprintEnroll() {
@@ -243,7 +197,6 @@ uint8_t getFingerprintEnroll() {
   p = finger.storeModel(id);
   if (p == FINGERPRINT_OK) {
     Serial.println("Stored!");
-    return 1;
   } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
     Serial.println("Communication error");
     return p;

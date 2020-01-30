@@ -8,7 +8,8 @@ import numpy as np
 
 context = zmq.Context()
 footage_socket = context.socket(zmq.SUB)
-footage_socket.bind('tcp://10.42.0.1:80000')
+#footage_socket.bind('tcp://10.42.0.1:80000')
+footage_socket.bind('tcp://127.0.0.1:80000')
 footage_socket.setsockopt_string(zmq.SUBSCRIBE, np.unicode(''))
 
 while True:
