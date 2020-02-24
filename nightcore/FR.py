@@ -18,10 +18,11 @@ class FR(object):
             ret, frame = cap.read()
             small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
             rgb_small_frame = small_frame[:, :, ::-1]
-            self.func_for_pc("getting face location")
+            #self.func_for_pc("getting face location")
             face_locations = face_recognition.face_locations(rgb_small_frame)
             if(len(face_locations) == 0):
-                self.func_for_pc("face not found")
+                #self.func_for_pc("face not found")
+                pass
             else:break
         face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
         for face_encoding in face_encodings:
@@ -42,16 +43,18 @@ class FR(object):
             ret, frame = img_src.read()
             small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
             rgb_small_frame = small_frame[:, :, ::-1]
-            self.func_for_pc("getting face location")
+            #self.func_for_pc("getting face location")
             face_locations = face_recognition.face_locations(rgb_small_frame)
             if(len(face_locations) == 0):
-                self.func_for_pc("face not found")
+                #self.func_for_pc("face not found")
+                pass
             else:
-                self.func_for_pc("gettign face encodings")
+                #self.func_for_pc("gettign face encodings")
                 face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
                 for face_encoding in face_encodings:
                     self.known_face_encodings.append(face_encoding)
-                    self.func_for_pc("written")
+                    #self.func_for_pc("written")
+                    self.func_for_pc("stored")
                 break
                 
         

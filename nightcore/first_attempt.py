@@ -37,6 +37,7 @@ class Implement(QtWidgets.QWidget, first_des.Ui_FORM):
         self.setupUi(self)
         self.img = None
         self.globl = ""
+        self.debug = ""
         self.put_start_img()
         self.thread = QThread()
         self.thread.start()
@@ -60,6 +61,7 @@ class Implement(QtWidgets.QWidget, first_des.Ui_FORM):
 
     def write_msg(self, msg):
         self.globl += msg + "\n"
+        self.debug += msg + "\n"
         #print(self.globl.count("\n"))
         if(self.globl.count("\n") > 30):
             ind = self.globl.find("\n")
@@ -107,6 +109,7 @@ class Implement(QtWidgets.QWidget, first_des.Ui_FORM):
             self.spawer.stop_trigger.emit()
             t1 = threading.Thread(target=self.waiter)
             t1.start()
+            print(self.debug)
             event.ignore()
         else:
             event.ignore()

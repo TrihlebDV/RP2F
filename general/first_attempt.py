@@ -21,8 +21,11 @@ import cv2
 import queue
 
 #GUI form
-import first_des
+#import first_des
 from PostHandl import Spawer
+
+import math
+import mouseEvent
 
 
 imp = None
@@ -31,13 +34,13 @@ def set_msg(msg):
     imp.write_msg(msg)
     return 0
 
-class Implement(QtWidgets.QWidget, first_des.Ui_FORM):
+class Implement(QtWidgets.QWidget, first_des.Ui_Form):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
         self.img = None
         self.globl = ""
-        self.put_start_img()
+        #self.put_start_img()
         self.thread = QThread()
         self.thread.start()
         self.server = SimpleXMLRPCServer(("10.42.0.1", 60002))
@@ -49,14 +52,14 @@ class Implement(QtWidgets.QWidget, first_des.Ui_FORM):
         self.robot = xmlrpc.client.ServerProxy('http://%s:%d' % ("10.42.0.69", 60001))
         self.spawer = Spawer(self.on_recive, self.write_msg)
         self.spawer.start()
-        self.text.setPlaceholderText("   write here   ")
-        
-        #self.Button.clicked.connect(self.addText)
 
     def on_recive(self, img):
-        self.imgLabel.setPixmap(QtGui.QPixmap.fromImage(img))
-        self.imgLabel.setAlignment(Qt.AlignHCenter    # qtCore    <-> QtCore
-                                         | Qt.AlignVCenter)
+        '''recive image in opencv format'''
+        self.img = img
+        self.reWrite() #- method for updating label content 
+        #self.imgLabel.setPixmap(QtGui.QPixmap.fromImage(img))
+        #self.imgLabel.setAlignment(Qt.AlignHCenter    # qtCore    <-> QtCore
+        #                                 | Qt.AlignVCenter)
 
     def write_msg(self, msg):
         self.globl += msg + "\n"
@@ -82,10 +85,6 @@ class Implement(QtWidgets.QWidget, first_des.Ui_FORM):
             if text.isdigit():
                 _ = self.robot.set_req(text)
             
-        
-    def put_start_img(self):
-        self.img = QtGui.QPixmap("img.jpg")
-       # self.imgLabel.setPixmap(self.img)
 
     def keyPressEvent(self, e):
         if e.key()   ==  Qt.Key_Escape:
