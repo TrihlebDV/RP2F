@@ -47,6 +47,7 @@ class Implement(QtWidgets.QWidget, mouseEvent.Ui_Form):
         self.set(self.default)
         self.pos = []
         self.start = None
+        self.face_cascade = cv2.CascadeClassifier('../../data/haarcascades/haarcascade_frontalface_default.xml')
         self.finished = True #predict twise requesting
         self.thread = QThread()
         self.thread.start()
@@ -121,13 +122,13 @@ class Implement(QtWidgets.QWidget, mouseEvent.Ui_Form):
             msg += self.texts[ self.mode["mode"] ]
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             gray_image = cv2.equalizeHist(gray_image)
-            cv2.putText(gray_image, msg,
+            img = cv2.cvtColor(gray_image,cv2.COLOR_GRAY2RGB)
+            cv2.putText(img, msg,
                         (180,300),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1,
-                        (255),
+                        (51, 51, 153),
                         2)
-            img = cv2.cvtColor(gray_image,cv2.COLOR_GRAY2RGB)
             #if self.mode["mode"]: t = threading.Thread(target=self.fake_robot, args=(True,))
             #else: t = threading.Thread(target=self.fake_robot, args=(False, ))
             if not self.send_request:
@@ -141,14 +142,18 @@ class Implement(QtWidgets.QWidget, mouseEvent.Ui_Form):
             msg += self.texts[ self.mode["mode"] ]
             gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
             gray_image = cv2.equalizeHist(gray_image)
-            cv2.putText(gray_image, msg,
+            img = cv2.cvtColor(gray_image,cv2.COLOR_GRAY2RGB)
+            cv2.putText(img, msg,
                         (180,300),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         1,
-                        (255),
+                        (0, 0, 153),
                         2)
-            img = cv2.cvtColor(gray_image,cv2.COLOR_GRAY2RGB)
         elif self.mode["mode"] == 9:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
+            for (x,y,w,h) in faces:
+                cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
             self.send_request = False
             
         '''if self.flag[1] or self.flag[2]:
